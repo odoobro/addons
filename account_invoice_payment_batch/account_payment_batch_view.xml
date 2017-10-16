@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+
+		<!-- Register payment from several invoices -->
+
+		<record id="view_account_payment_batch_invoice_form" model="ir.ui.view">
+			<field name="name">view.account.payment.batch.invoice.form</field>
+			<field name="model">account.payment.batch</field>
+			<field name="arch" type="xml">
+				<form string="Register Payment Batch">
+					<field name="payment_type" invisible="1" />
+					<field name="partner_type" invisible="1" />
+					<field name="inv_type" invisible="1" />
+					<group>
+						<group>
+							<field name="partner_id" required="1"/>
+							<field name="journal_id" widget="selection" />
+							<field name="hide_payment_method" invisible="1" />
+							<field name="payment_method_id" widget="radio"
+								attrs="{'invisible': [('hide_payment_method', '=', True)]}" />
+							<field name="payment_method_code" invisible="1" />
+							<field name="amount" />
+							<field name="balance" readonly="1"/>
+
+						</group>
+						<group>
+							<field name="currency_id" />
+							<field name="payment_date" />
+							<field name="communication" />
+						</group>
+					</group>
+					<group string="Debit" colspan='1' name="group_debit">
+						<field name='line_dr_ids' nolabel='1'>
+							<tree editable="bottom" create="false" >
+								<field name="move_line_id" readonly="1"/>
+								<field name="account_id" />
+								<field name="date" readonly="1"/>
+								<field name="date_maturity" readonly="1"/>
+								<field name="balance" readonly="1"/>
+								<field name="amount_due" sum="Due Amount"/>
+								<field name="is_full_payment" />
+								<field name="amount" sum="Due Amount"/>
+								<field name="currency_id" invisible="1" />
+								<field name="type" invisible="1" />
+							</tree>
+						</field>
+					</group>
+					<group string="Credit" colspan='1' name="group_credit">
+						<field name='line_cr_ids' nolabel='1'>
+							<tree editable="bottom" create="false" >
+								<field name="move_line_id" readonly="1"/>
+								<field name="account_id" />
+								<field name="date" readonly="1"/>
+								<field name="date_maturity" readonly="1"/>
+								<field name="balance" readonly="1"/>
+								<field name="amount_due" sum="Due Amount"/>
+								<field name="is_full_payment" />
+								<field name="amount" sum="Due Amount"/>
+								<field name="currency_id" invisible="1" />
+								<field name="type" invisible="1" />
+							</tree>
+						</field>
+					</group>					
+					<footer>
+						<button string='Pay' name="create_payment" type="object"
+							class="btn-primary" />
+						<button string="Cancel" class="btn-default" special="cancel" />
+					</footer>
+				</form>
+			</field>
+		</record>
+		<record id="view_account_payment_batch_bill_form" model="ir.ui.view">
+			<field name="name">view.account.payment.batch.bill.form</field>
+			<field name="model">account.payment.batch</field>
+			<field name="inherit_id" ref="account_invoice_payment_batch.view_account_payment_batch_invoice_form" />
+			<field name="mode">primary</field> 
+			<field name="arch" type="xml">
+				<xpath expr="//group[@name='group_debit']" position="attributes">
+					<attribute name="string">Credit</attribute>
+				</xpath>
+				<xpath expr="//group[@name='group_credit']" position="attributes">
+					<attribute name="string">Debit</attribute>
+				</xpath>
+			</field>
+		</record>		
+        <record id="action_register_invoice_payment" model="ir.actions.act_window">
+            <field name="name">Invoice Payment Batch</field>
+            <field name="res_model">account.payment.batch</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="account_invoice_payment_batch.view_account_payment_batch_invoice_form"/>
+            <field name="context">{'default_inv_type': 'out_invoice',
+                'inv_type':'out_invoice',
+                'journal_type': 'sale'}</field>
+        </record>
+        <record id="action_register_bill_payment" model="ir.actions.act_window">
+            <field name="name">Bill Payment Batch</field>
+            <field name="res_model">account.payment.batch</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="account_invoice_payment_batch.view_account_payment_batch_bill_form"/>
+            <field name="context">{'default_inv_type': 'in_invoice',
+                'inv_type': 'in_invoice',
+                'journal_type': 'purchase'}</field>
+        </record>
+
+        <!-- ============================================================== -->
+        <!-- Customer / Vendor Bill Payment Batch -->
+        <!-- ============================================================== -->
+        <menuitem id="menu_register_customer_payment_batch" name="Invoice Payment Batch" action="action_register_invoice_payment" parent="account.menu_finance_receivables" sequence="2" />
+        <menuitem id="menu_register_vendor_payment_batch" name="Bill Payment Batch" action="action_register_bill_payment" parent="account.menu_finance_payables" sequence="2" />
+
+        
+	</data>
+</odoo>
